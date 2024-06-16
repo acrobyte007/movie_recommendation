@@ -51,6 +51,9 @@ movies_recommend = pd.DataFrame(movies_dict)
 
 # Load pre-processed movie details from pre_process_df.csv for filtering
 movies_genres = pd.read_csv('pre_process_df.csv')
+credit = pd.read_csv("tmdb_5000_movies.csv")
+movies_genres["score"] = credit["popularity"]
+
 
 # Remove square brackets from features
 def remove_square_brackets(text):
@@ -58,6 +61,7 @@ def remove_square_brackets(text):
         return text.strip("[]").replace("'", "").replace('"', '').replace(" ", "").split(",")
     else:
         return []
+
 
 movies_genres['cast'] = movies_genres['cast'].apply(remove_square_brackets)
 movies_genres['crew'] = movies_genres['crew'].apply(remove_square_brackets)
@@ -67,6 +71,7 @@ movies_genres['keywords'] = movies_genres['keywords'].apply(remove_square_bracke
 # Load the similarity matrix for recommendations
 with open('similarity.pkl', 'rb') as f:
     cosine_sim = pickle.load(f)
+
 
 # Function to get movie recommendations for a given movie title
 def recommend_movies(movie):
@@ -88,6 +93,7 @@ def recommend_movies(movie):
     recommended_movies = [movies_recommend.iloc[i[0]].title for i in movie_list]
     return recommended_movies
 
+
 # Function to get top 5 movies for a selected cast member
 def top_movies_by_cast(cast_name):
     # Filter movies that contain the selected cast member
@@ -97,9 +103,23 @@ def top_movies_by_cast(cast_name):
         st.error("No movies found for the selected cast member.")
         return []
 
-    # Get the top 5 recommended movies based on the first movie found for the cast member
-    first_movie_title = movies_with_cast.iloc[0]['title']
-    return recommend_movies(first_movie_title)[:5]
+    # Sort the movies by score in descending order
+    sorted_movies = movies_with_cast.sort_values(by='score', ascending=False)
+
+    # Get the titles of the top 5 movies
+    top_movies = sorted_movies.head(5)['title'].tolist()
+
+    # Get recommendations for each top movie
+    recommended_movies = []
+    for movie in top_movies:
+        recommended_movies.extend(recommend_movies(movie))
+
+    # Remove duplicates while preserving order
+    seen = set()
+    recommended_movies = [x for x in recommended_movies if not (x in seen or seen.add(x))]
+
+    return recommended_movies[:5]
+
 
 # Function to get top 5 movies for a selected crew member
 def top_movies_by_crew(crew_name):
@@ -110,9 +130,23 @@ def top_movies_by_crew(crew_name):
         st.error("No movies found for the selected crew member.")
         return []
 
-    # Get the top 5 recommended movies based on the first movie found for the crew member
-    first_movie_title = movies_with_crew.iloc[0]['title']
-    return recommend_movies(first_movie_title)[:5]
+    # Sort the movies by score in descending order
+    sorted_movies = movies_with_crew.sort_values(by='score', ascending=False)
+
+    # Get the titles of the top 5 movies
+    top_movies = sorted_movies.head(5)['title'].tolist()
+
+    # Get recommendations for each top movie
+    recommended_movies = []
+    for movie in top_movies:
+        recommended_movies.extend(recommend_movies(movie))
+
+    # Remove duplicates while preserving order
+    seen = set()
+    recommended_movies = [x for x in recommended_movies if not (x in seen or seen.add(x))]
+
+    return recommended_movies[:5]
+
 
 # Define layout columns
 col1, col2, col3, col4 = st.columns(4)
@@ -123,7 +157,8 @@ with col1:
     selected_movie_name = st.selectbox('Select a movie to get recommendations:', movies_recommend['title'].values)
 
     if st.button('Recommend'):
-        st.markdown(f'<p class="recommendations">Similar movies like {selected_movie_name}:</p>', unsafe_allow_html=True)
+        st.markdown(f'<p class="recommendations">Similar movies like {selected_movie_name}:</p>',
+                    unsafe_allow_html=True)
         recommendations = recommend_movies(selected_movie_name)
 
         for movie in recommendations:
@@ -136,7 +171,7 @@ with col2:
     selected_cast = st.selectbox('Select a cast member to list top movies:', sorted(all_cast_names))
 
     if selected_cast:
-        st.markdown(f'<p class="recommendations">Top 5 Movies for {selected_cast}:</p>', unsafe_allow_html=True)
+        st.markdown(f'<p class="recommendations">Top 5 Movies of {selected_cast}:</p>', unsafe_allow_html=True)
         top_movies_cast = top_movies_by_cast(selected_cast)
 
         for movie in top_movies_cast:
@@ -144,12 +179,12 @@ with col2:
 
 # Bottom left corner: Selection by crew name
 with col3:
-    st.markdown('### Select by crew name')
+    st.markdown('### Select by Crew Name')
     all_crew_names = set(crew for crew_list in movies_genres['crew'] for crew in crew_list)
     selected_crew = st.selectbox('Select a crew member to list top movies:', sorted(all_crew_names))
 
     if selected_crew:
-        st.markdown(f'<p class="recommendations">Top 5 Movies for {selected_crew}:</p>', unsafe_allow_html=True)
+        st.markdown(f'<p class="recommendations">Top 5 Movies of {selected_crew}:</p>', unsafe_allow_html=True)
         top_movies_crew = top_movies_by_crew(selected_crew)
 
         for movie in top_movies_crew:
