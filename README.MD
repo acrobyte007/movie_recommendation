@@ -5,7 +5,7 @@
 This project is deployed on an AWS EC2 instance running on a Linux operating system.
 
 ## Application link
-[http://13.126.137.13:8501/]
+[http://13.232.88.163:8501/]
 
 ## Project Overview
 This project is a Movie Recommendation System that leverages advanced Natural Language Processing (NLP) techniques to analyze movie descriptions and reviews, providing personalized movie suggestions based on user preferences.
