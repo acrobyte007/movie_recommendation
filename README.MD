@@ -1,6 +1,7 @@
 
 
 # Movie Recommendation System
+[http://52.66.197.41:8501/]
 
 This project is deployed on an AWS EC2 instance running on a Linux operating system.
 
