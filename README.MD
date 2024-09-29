@@ -1,4 +1,4 @@
-![image]()
+![image](https://github.com/acrobyte007/movie_recommendation/blob/main/Movie.PNG)
 
 # Movie Recommendation System
 [http://52.66.197.41:8501/]
