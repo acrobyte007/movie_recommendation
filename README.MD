@@ -1,12 +1,4 @@
 ![image](https://github.com/acrobyte007/movie_recommendation/blob/main/Movie.PNG)
-
-# Movie Recommendation System
-[http://52.66.197.41:8501/]
-
-This project is deployed on an AWS EC2 instance running on a Linux operating system.
-
-
-
 ## Project Overview
 This project is a Movie Recommendation System that leverages advanced Natural Language Processing (NLP) techniques to analyze movie descriptions and reviews, providing personalized movie suggestions based on user preferences.
 
